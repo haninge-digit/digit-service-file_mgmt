@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: file-mgmt-config
+  namespace:  worker-services
+data:
+  TENANT_ID: <tenant_id>  # Set to correct value

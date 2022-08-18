@@ -1,0 +1,99 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: file-mgmt
+  namespace: worker-services
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-mgmt
+  template:
+    metadata:
+      labels:
+        app: file-mgmt
+    spec:
+      imagePullSecrets:
+      - name: ghcr-pull-secret
+      containers:
+        - name: file-mgmt
+          image: ghcr.io/haninge-digit/digit-service-file_mgmt:main
+          imagePullPolicy: Always
+          ports:
+            - name: grpc
+              containerPort: 50051
+              protocol: TCP
+          env:
+            - name: DEBUG
+              value: 'false'
+            - name: TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: file-mgmt-config
+                  key: TENANT_ID
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: file-mgmt-secret
+                  key: CLIENT_ID
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: file-mgmt-secret
+                  key: CLIENT_SECRET
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          # livenessProbe:
+          #   httpGet:
+          #     path: /probe/liveness
+          #     port: http
+          #     scheme: HTTP
+          #   timeoutSeconds: 1
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   failureThreshold: 3
+          # readinessProbe:
+          #   httpGet:
+          #     path: /probe/readiness
+          #     port: http
+          #     scheme: HTTP
+          #   initialDelaySeconds: 2
+          #   timeoutSeconds: 10
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          securityContext: {}
+      tolerations:
+      - key: "kubernetes.azure.com/scalesetpriority"
+        operator: "Equal"
+        value: "spot"
+        effect: "NoSchedule"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: file-mgmt
+  namespace: worker-services
+spec:
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 50051
+      targetPort: 50051
+  selector:
+    app: file-mgmt
+  type: ClusterIP

@@ -1,0 +1,4 @@
+grpcio==1.47.0
+protobuf==4.21.5
+azure-identity==1.10
+msgraph-core==0.2.2
