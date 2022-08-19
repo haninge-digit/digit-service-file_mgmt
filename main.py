@@ -1,4 +1,5 @@
 from concurrent import futures
+from distutils import file_util
 import logging
 import json
 import re
@@ -28,22 +29,28 @@ client = GraphClient(credential=credential)
 
 
 """
+Service error class
+"""
+class ServiceError(Exception):
+    def __init__(self, code, details=""):
+        # grpc.ServicerContext.abort()
+        self.code = code
+        self.details = details
+
+
+"""
 Service functions
 """
 def list_files_in_drive(siteId, driveId, path, pattern):
     file_list = {'siteId':siteId, 'driveId':driveId, 'path':path, 'pattern':pattern, 'files':[]}
 
     if siteId == "" and driveId == "":
-        logg_text = (f"Either of siteId or driveId must be given")
-        logging.error(logg_text)
-        return file_list
+        raise ServiceError(grpc.StatusCode.INVALID_ARGUMENT, f"Either siteId or driveId must be given")
 
     if siteId != "":
         result = client.get(f"/sites/{siteId}/drive").json()
         if 'error' in result:
-            logg_text = (f"An error occured when getting driveId: {result['error']['message']}")
-            logging.error(logg_text)
-            return file_list
+            raise ServiceError(grpc.StatusCode.PERMISSION_DENIED,f"An error occured when getting driveId: {result['error']['message']}")
         driveId = result['id']
         file_list['driveId'] = driveId
 
@@ -53,11 +60,13 @@ def list_files_in_drive(siteId, driveId, path, pattern):
     
     result = client.get(f"/drives/{driveId}/root:/{path}:/children").json()
     if 'error' in result:
-        logg_text = (f"An error occured when listing drive: {result['error']['message']}")
-        logging.error(logg_text)
-        return file_list
+        raise ServiceError(grpc.StatusCode.PERMISSION_DENIED,f"An error occured when listing drive: {result['error']['message']}")
 
-    r = re.compile(pattern)
+    try:
+        r = re.compile(pattern)
+    except re.error:
+        raise ServiceError(grpc.StatusCode.INVALID_ARGUMENT,f"'{pattern}' is not a valid RegExp expression")
+
     for file in result['value']:
         if bool(r.match(file['name'])):
             if 'folder' in file:
@@ -73,18 +82,14 @@ def list_files_in_drive(siteId, driveId, path, pattern):
 def read_file_content(siteId, driveId, path, fileName):
     file_list = list_files_in_drive(siteId, driveId, path, fileName)
     if 'files' not in file_list and len(file_list['files']) != 1:
-        logg_text = (f"{fileName} not found!")
-        logging.error(logg_text)
-        return "",b""
+        raise ServiceError(grpc.StatusCode.NOT_FOUND,f"{fileName} not found!")
 
     driveId = file_list['driveId']
     itemId = file_list['files'][0]['id']        # Get the ID of the file from the search
 
     result = client.get(f"/drives/{driveId}/items/{itemId}/content")
     if 'error' in result:
-        logg_text = (f"An error occured when reading the file: {result['error']['message']}")
-        logging.error(logg_text)
-        return "",b""
+        raise ServiceError(grpc.StatusCode.PERMISSION_DENIED,f"An error occured when reading the file: {result['error']['message']}")
 
     return file_list['files'][0]['type'], result.content
 
@@ -95,11 +100,21 @@ gRPC worker
 class FileMgmt(file_mgmt_pb2_grpc.FileMgmtServicer):
 
     def ListFiles(self, request, context):
-        file_list = list_files_in_drive(request.siteId, request.driveId, request.path, request.pattern)
+        try:
+            file_list = list_files_in_drive(request.siteId, request.driveId, request.path, request.pattern)
+        except ServiceError as e:
+            logging.error(e.details)
+            context.abort(e.code,e.details)
+
         return file_mgmt_pb2.ListFilesReply(files=json.dumps(file_list))
 
     def ReadFile(self, request, context):
-        type,content = read_file_content(request.siteId, request.driveId, request.path, request.fileName)
+        try:
+            type,content = read_file_content(context, request.siteId, request.driveId, request.path, request.fileName)
+        except ServiceError as e:
+            logging.error(e.details)
+            context.abort(e.code,e.details)            
+        
         return file_mgmt_pb2.ReadFileReply(type=type, content=content)
 
 
