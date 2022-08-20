@@ -13,7 +13,7 @@ message ListFilesRequest {
   string siteId = 1;
   // The Sharepoint drive ID to list. Use this or siteId
   string driveId = 2;
-  // The directory path. "General" is the default.
+  // The directory path. The "root" is the default.
   string path = 3;
   // The file name RegExp pattern to search for. "" is the default matching everything.
   string pattern = 4;
@@ -29,10 +29,12 @@ message ReadFileRequest {
   string siteId = 1;
   // The Sharepoint drive ID the file is located in. Use this or siteId
   string driveId = 2;
-  // The directory path where the file is located. "General" is the default.
+  // The directory path where the file is located. The "root" is the default.
   string path = 3;
-  // The name of the file.
+  // The name of the file. Use this or fileId
   string fileName = 4;
+  // The fileId (itemId) of the file. Use this or fileName
+  string fileId = 5;
 }
 
 message ReadFileReply {

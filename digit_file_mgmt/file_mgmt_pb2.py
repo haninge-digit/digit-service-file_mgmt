@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x64igit_file_mgmt/file_mgmt.proto\"R\n\x10ListFilesRequest\x12\x0e\n\x06siteId\x18\x01 \x01(\t\x12\x0f\n\x07\x64riveId\x18\x02 \x01(\t\x12\x0c\n\x04path\x18\x03 \x01(\t\x12\x0f\n\x07pattern\x18\x04 \x01(\t\"\x1f\n\x0eListFilesReply\x12\r\n\x05\x66iles\x18\x01 \x01(\t\"R\n\x0fReadFileRequest\x12\x0e\n\x06siteId\x18\x01 \x01(\t\x12\x0f\n\x07\x64riveId\x18\x02 \x01(\t\x12\x0c\n\x04path\x18\x03 \x01(\t\x12\x10\n\x08\x66ileName\x18\x04 \x01(\t\".\n\rReadFileReply\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\x0c\x32m\n\x08\x46ileMgmt\x12\x31\n\tListFiles\x12\x11.ListFilesRequest\x1a\x0f.ListFilesReply\"\x00\x12.\n\x08ReadFile\x12\x10.ReadFileRequest\x1a\x0e.ReadFileReply\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x64igit_file_mgmt/file_mgmt.proto\"R\n\x10ListFilesRequest\x12\x0e\n\x06siteId\x18\x01 \x01(\t\x12\x0f\n\x07\x64riveId\x18\x02 \x01(\t\x12\x0c\n\x04path\x18\x03 \x01(\t\x12\x0f\n\x07pattern\x18\x04 \x01(\t\"\x1f\n\x0eListFilesReply\x12\r\n\x05\x66iles\x18\x01 \x01(\t\"b\n\x0fReadFileRequest\x12\x0e\n\x06siteId\x18\x01 \x01(\t\x12\x0f\n\x07\x64riveId\x18\x02 \x01(\t\x12\x0c\n\x04path\x18\x03 \x01(\t\x12\x10\n\x08\x66ileName\x18\x04 \x01(\t\x12\x0e\n\x06\x66ileId\x18\x05 \x01(\t\".\n\rReadFileReply\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\x0c\x32m\n\x08\x46ileMgmt\x12\x31\n\tListFiles\x12\x11.ListFilesRequest\x1a\x0f.ListFilesReply\"\x00\x12.\n\x08ReadFile\x12\x10.ReadFileRequest\x1a\x0e.ReadFileReply\"\x00\x62\x06proto3')
 
 
 
@@ -59,9 +59,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _LISTFILESREPLY._serialized_start=119
   _LISTFILESREPLY._serialized_end=150
   _READFILEREQUEST._serialized_start=152
-  _READFILEREQUEST._serialized_end=234
-  _READFILEREPLY._serialized_start=236
-  _READFILEREPLY._serialized_end=282
-  _FILEMGMT._serialized_start=284
-  _FILEMGMT._serialized_end=393
+  _READFILEREQUEST._serialized_end=250
+  _READFILEREPLY._serialized_start=252
+  _READFILEREPLY._serialized_end=298
+  _FILEMGMT._serialized_start=300
+  _FILEMGMT._serialized_end=409
 # @@protoc_insertion_point(module_scope)
