@@ -6,8 +6,7 @@ import re
 import os
 
 import grpc
-import file_mgmt_pb2
-import file_mgmt_pb2_grpc
+from digit_file_mgmt import file_mgmt_pb2, file_mgmt_pb2_grpc
 
 from msgraph.core import GraphClient
 from azure.identity import ClientSecretCredential

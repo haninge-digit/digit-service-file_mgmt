@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import file_mgmt_pb2 as file__mgmt__pb2
+from digit_file_mgmt import file_mgmt_pb2 as digit__file__mgmt_dot_file__mgmt__pb2
 
 
 class FileMgmtStub(object):
@@ -16,13 +16,13 @@ class FileMgmtStub(object):
         """
         self.ListFiles = channel.unary_unary(
                 '/FileMgmt/ListFiles',
-                request_serializer=file__mgmt__pb2.ListFilesRequest.SerializeToString,
-                response_deserializer=file__mgmt__pb2.ListFilesReply.FromString,
+                request_serializer=digit__file__mgmt_dot_file__mgmt__pb2.ListFilesRequest.SerializeToString,
+                response_deserializer=digit__file__mgmt_dot_file__mgmt__pb2.ListFilesReply.FromString,
                 )
         self.ReadFile = channel.unary_unary(
                 '/FileMgmt/ReadFile',
-                request_serializer=file__mgmt__pb2.ReadFileRequest.SerializeToString,
-                response_deserializer=file__mgmt__pb2.ReadFileReply.FromString,
+                request_serializer=digit__file__mgmt_dot_file__mgmt__pb2.ReadFileRequest.SerializeToString,
+                response_deserializer=digit__file__mgmt_dot_file__mgmt__pb2.ReadFileReply.FromString,
                 )
 
 
@@ -48,13 +48,13 @@ def add_FileMgmtServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ListFiles': grpc.unary_unary_rpc_method_handler(
                     servicer.ListFiles,
-                    request_deserializer=file__mgmt__pb2.ListFilesRequest.FromString,
-                    response_serializer=file__mgmt__pb2.ListFilesReply.SerializeToString,
+                    request_deserializer=digit__file__mgmt_dot_file__mgmt__pb2.ListFilesRequest.FromString,
+                    response_serializer=digit__file__mgmt_dot_file__mgmt__pb2.ListFilesReply.SerializeToString,
             ),
             'ReadFile': grpc.unary_unary_rpc_method_handler(
                     servicer.ReadFile,
-                    request_deserializer=file__mgmt__pb2.ReadFileRequest.FromString,
-                    response_serializer=file__mgmt__pb2.ReadFileReply.SerializeToString,
+                    request_deserializer=digit__file__mgmt_dot_file__mgmt__pb2.ReadFileRequest.FromString,
+                    response_serializer=digit__file__mgmt_dot_file__mgmt__pb2.ReadFileReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -78,8 +78,8 @@ class FileMgmt(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/FileMgmt/ListFiles',
-            file__mgmt__pb2.ListFilesRequest.SerializeToString,
-            file__mgmt__pb2.ListFilesReply.FromString,
+            digit__file__mgmt_dot_file__mgmt__pb2.ListFilesRequest.SerializeToString,
+            digit__file__mgmt_dot_file__mgmt__pb2.ListFilesReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -95,7 +95,7 @@ class FileMgmt(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/FileMgmt/ReadFile',
-            file__mgmt__pb2.ReadFileRequest.SerializeToString,
-            file__mgmt__pb2.ReadFileReply.FromString,
+            digit__file__mgmt_dot_file__mgmt__pb2.ReadFileRequest.SerializeToString,
+            digit__file__mgmt_dot_file__mgmt__pb2.ReadFileReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
