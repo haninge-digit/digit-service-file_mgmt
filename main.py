@@ -123,7 +123,7 @@ class FileMgmt(file_mgmt_pb2_grpc.FileMgmtServicer):
 
     def ReadFile(self, request, context):
         try:
-            type, content = read_file_content(context, request.siteId, request.driveId, request.path, request.fileName)
+            type, content = read_file_content(request.siteId, request.driveId, request.path, request.fileName)
         except ServiceError as e:
             logging.error(e.details)
             context.abort(e.code, e.details)
