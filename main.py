@@ -43,6 +43,13 @@ Service functions
 """
 
 
+def get_drive_at_site(siteId):
+    result = client.get(f"/sites/{siteId}/drive").json()        # Get the sites driveId
+    if 'error' in result:
+        raise ServiceError(grpc.StatusCode.PERMISSION_DENIED, f"An error occured when getting driveId: {result['error']['message']}")
+    return result['id']
+
+
 def list_files_in_drive(siteId, driveId, path, pattern):
     file_list = {'siteId': siteId, 'driveId': driveId, 'path': path, 'pattern': pattern, 'files': []}
 
@@ -50,10 +57,7 @@ def list_files_in_drive(siteId, driveId, path, pattern):
         raise ServiceError(grpc.StatusCode.INVALID_ARGUMENT, f"Either siteId or driveId must be given")
 
     if not driveId:
-        result = client.get(f"/sites/{siteId}/drive").json()        # Get the sites driveId
-        if 'error' in result:
-            raise ServiceError(grpc.StatusCode.PERMISSION_DENIED, f"An error occured when getting driveId: {result['error']['message']}")
-        driveId = result['id']
+        driveId = get_drive_at_site(siteId)
         file_list['driveId'] = driveId
 
     if path:
@@ -88,21 +92,27 @@ def list_files_in_drive(siteId, driveId, path, pattern):
     return file_list
 
 
-def read_file_content(siteId, driveId, path, fileName):
-    file_list = list_files_in_drive(siteId, driveId, path, fileName)
-    if len(file_list['files']) == 0:
-        raise ServiceError(grpc.StatusCode.NOT_FOUND, f"{fileName} not found!")
-    if len(file_list['files']) != 1:
-        raise ServiceError(grpc.StatusCode.NOT_FOUND, f"More than one {fileName} found???")
+def read_file_content(siteId, driveId, path, fileName, itemId):
+    if not driveId:
+        driveId = get_drive_at_site(siteId)
 
-    driveId = file_list['driveId']
-    itemId = file_list['files'][0]['id']        # Get the ID of the file from the search
+    if not itemId:
+        file_list = list_files_in_drive(siteId, driveId, path, fileName)
+        if len(file_list['files']) == 0:
+            raise ServiceError(grpc.StatusCode.NOT_FOUND, f"{fileName} not found!")
+        if len(file_list['files']) != 1:
+            raise ServiceError(grpc.StatusCode.NOT_FOUND, f"More than one {fileName} found???")
+
+        itemId = file_list['files'][0]['id']        # Get the ID of the file from the search
+        fileType = file_list['files'][0]['type']    # Also save the file type
+    else:
+        fileType = ""       # Blank for now. Might implement a get_file_type function later
 
     result = client.get(f"/drives/{driveId}/items/{itemId}/content")
     if 'error' in result:
         raise ServiceError(grpc.StatusCode.PERMISSION_DENIED, f"An error occured when reading the file: {result['error']['message']}")
 
-    return file_list['files'][0]['type'], result.content
+    return fileType, result.content
 
 
 """
@@ -123,7 +133,7 @@ class FileMgmt(file_mgmt_pb2_grpc.FileMgmtServicer):
 
     def ReadFile(self, request, context):
         try:
-            type, content = read_file_content(request.siteId, request.driveId, request.path, request.fileName)
+            type, content = read_file_content(request.siteId, request.driveId, request.path, request.fileName, request.fileId)
         except ServiceError as e:
             logging.error(e.details)
             context.abort(e.code, e.details)
