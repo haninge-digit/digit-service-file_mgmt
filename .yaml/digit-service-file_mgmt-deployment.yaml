@@ -1,26 +1,26 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: file-mgmt
-  namespace: worker-services
+  name: filemgmt
+  namespace: camunda-workers
   labels:
     app: digit-plattform
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: file-mgmt
+      app: filemgmt
   template:
     metadata:
       labels:
-        app: file-mgmt
-        app.kubernetes.io/name: file-mgmt
+        app: filemgmt
+        app.kubernetes.io/name: filemgmt
     spec:
       imagePullSecrets:
       - name: ghcr-pull-secret
       containers:
-        - name: file-mgmt
-          image: ghcr.io/haninge-digit/digit-service-file_mgmt:main
+        - name: filemgmt
+          image: ghcr.io/haninge-digit/digit-service-filemgmt:main
           imagePullPolicy: Always
           ports:
             - name: grpc
@@ -31,19 +31,19 @@ spec:
               value: 'false'
             - name: TENANT_ID
               valueFrom:
-                configMapKeyRef:
-                  name: file-mgmt-config
-                  key: TENANT_ID
+                secretKeyRef:
+                  name: ms365filemgmt-secret
+                  key: AD_TENANT_ID
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: file-mgmt-secret
-                  key: CLIENT_ID
+                  name: ms365filemgmt-secret
+                  key: AD_CLIENT_ID
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: file-mgmt-secret
-                  key: CLIENT_SECRET
+                  name: ms365filemgmt-secret
+                  key: AD_CLIENT_SECRET
           resources:
             limits:
               memory: "128Mi"
@@ -87,8 +87,8 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: file-mgmt
-  namespace: worker-services
+  name: filemgmt
+  namespace: camunda-workers
   labels:
     app: digit-plattform
 spec:
@@ -98,5 +98,5 @@ spec:
       port: 50051
       targetPort: 50051
   selector:
-    app: file-mgmt
+    app: filemgmt
   type: ClusterIP
